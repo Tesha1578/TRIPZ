@@ -14,6 +14,7 @@ import Emergency from './pages/Emergency';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ChatAssistant from './components/ChatAssistant';
+import GlobalSOSButton from './components/GlobalSOSButton';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
 
           <Footer />
           <ChatAssistant />
+          <GlobalSOSButton />
         </div>
       </Router>
     </TravelProvider>

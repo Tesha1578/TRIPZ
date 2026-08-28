@@ -5,7 +5,16 @@ import { ArrowRight, ArrowLeft, Key, Check } from 'lucide-react';
 
 const Onboarding = () => {
   const navigate = useNavigate();
-  const { onboardingData, setOnboardingData, apiKey, setApiKey } = useContext(TravelContext);
+  const { 
+    onboardingData, 
+    setOnboardingData, 
+    apiKey, 
+    setApiKey,
+    groupRoom,
+    createGroupRoom,
+    joinGroupRoom,
+    leaveGroupRoom
+  } = useContext(TravelContext);
 
   const [step, setStep] = useState(1);
   const [budget, setBudget] = useState(onboardingData.budget);
@@ -16,6 +25,7 @@ const Onboarding = () => {
   const [selectedInterests, setSelectedInterests] = useState(onboardingData.interests);
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [tempKey, setTempKey] = useState(apiKey);
+  const [transport, setTransport] = useState(onboardingData.transport || 'Bus');
 
   const interestsList = [
     { id: "beach", label: "🏖️ Beach" },
@@ -71,7 +81,9 @@ const Onboarding = () => {
         interests: selectedInterests,
         startDate,
         endDate,
-        travelStyle
+        travelStyle,
+        transport,
+        groupCode: groupRoom ? groupRoom.inviteCode : ''
       });
       // Redirect to Recommendations
       navigate('/recommendations');
@@ -180,6 +192,28 @@ const Onboarding = () => {
                 <span className="highlight-badge" style={{ marginBottom: 0 }}>{days} Days</span>
               </div>
             )}
+
+            {/* Transport Preference */}
+            <div style={{ marginBottom: '32px' }}>
+              <label style={{ display: 'block', fontWeight: '700', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '12px' }}>
+                Primary Transport Mode
+              </label>
+              <select 
+                className="form-input" 
+                value={transport} 
+                onChange={(e) => setTransport(e.target.value)}
+                style={{ fontSize: '1rem', padding: '14px 16px' }}
+              >
+                <option value="Bus">🚌 Public Bus (Low Carbon)</option>
+                <option value="Train">🚆 Railway Train (Ultra-Low Carbon)</option>
+                <option value="Car">🚗 Petrol/Diesel Car (Medium Carbon)</option>
+                <option value="Eco-Car">🔌 Electric Eco-Car (Low Carbon)</option>
+                <option value="Flight">✈️ Commercial Flight (High Carbon)</option>
+              </select>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
+                Used to compute the environmental carbon footprint of your daily stops.
+              </p>
+            </div>
           </div>
         )}
 
@@ -237,6 +271,124 @@ const Onboarding = () => {
                 );
               })}
             </div>
+
+            {/* Group Room Interface */}
+            {travelStyle === 'friends' && (
+              <div style={{
+                backgroundColor: 'var(--light-gray)',
+                border: '1.5px solid var(--border-dark)',
+                borderRadius: '20px',
+                padding: '28px',
+                marginTop: '32px',
+                animation: 'fadeIn 0.3s ease'
+              }}>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  👥 TRIPZ Group Room
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                  Generate an invite link for your squad. We will automatically merge budgets and find matching tags!
+                </p>
+
+                {groupRoom ? (
+                  <div>
+                    {/* Active Group Info */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid var(--border-gray)',
+                      padding: '16px 20px',
+                      borderRadius: '12px',
+                      marginBottom: '20px'
+                    }}>
+                      <div>
+                        <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '800' }}>INVITE CODE</span>
+                        <h4 style={{ fontSize: '1.2rem', fontWeight: '800', fontFamily: 'monospace', letterSpacing: '1px', marginTop: '2px' }}>
+                          {groupRoom.inviteCode}
+                        </h4>
+                      </div>
+                      <button 
+                        onClick={leaveGroupRoom} 
+                        className="btn btn-secondary"
+                        style={{ padding: '6px 12px', fontSize: '0.75rem', borderColor: '#FF3B30', color: '#FF3B30' }}
+                      >
+                        Leave Room
+                      </button>
+                    </div>
+
+                    {/* Group Vibe summary */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <h4 style={{ fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', marginBottom: '10px' }}>
+                        Squad Members & Preferences
+                      </h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {groupRoom.members.map((member, idx) => (
+                          <div key={idx} style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            backgroundColor: '#FFFFFF',
+                            padding: '12px 16px',
+                            borderRadius: '10px',
+                            border: '1px solid var(--border-gray)',
+                            fontSize: '0.8rem'
+                          }}>
+                            <div>
+                              <strong style={{ color: 'var(--text-primary)' }}>{member.name}</strong>
+                              <span style={{ color: 'var(--text-secondary)', marginLeft: '8px' }}>
+                                Budget: ₹{member.budget}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', gap: '4px' }}>
+                              {member.interests.map(t => (
+                                <span key={t} style={{ fontSize: '0.65rem', backgroundColor: 'var(--light-gray)', padding: '2px 6px', borderRadius: '4px' }}>
+                                  {t}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Squad profile alignment indicator */}
+                    <div style={{
+                      backgroundColor: 'var(--neon-lime)',
+                      padding: '14px 18px',
+                      borderRadius: '12px',
+                      border: '1px solid var(--border-dark)',
+                      fontSize: '0.8rem'
+                    }}>
+                      <strong>⚡ Vibe Alignment: 88%</strong>
+                      <p style={{ fontSize: '0.75rem', marginTop: '4px', color: 'rgba(8,8,8,0.8)' }}>
+                        Budget ceiling is computed at ₹{Math.round(groupRoom.members.reduce((a,b)=>a+b.budget, 0)/groupRoom.members.length)}/person. Intersecting tags: <strong>food, adventure, beach</strong>.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button 
+                      onClick={() => createGroupRoom('You (Host)')} 
+                      className="btn btn-primary"
+                      style={{ flex: 1, padding: '10px 16px', fontSize: '0.8rem' }}
+                    >
+                      Create Group Room
+                    </button>
+                    <button 
+                      onClick={() => {
+                        const code = prompt("Enter Invite Code (e.g. TRIPZ-ABCD):");
+                        if (code) joinGroupRoom(code, 'You');
+                      }} 
+                      className="btn btn-secondary"
+                      style={{ flex: 1, padding: '10px 16px', fontSize: '0.8rem' }}
+                    >
+                      Join Room Code
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 

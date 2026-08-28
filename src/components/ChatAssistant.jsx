@@ -1,18 +1,32 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { TravelContext } from '../context/TravelContext';
 import { DESTINATIONS, TRANSLATIONS } from '../data/mockData';
-import { MessageSquare, X, Send, Languages, Sparkles } from 'lucide-react';
+import { MessageSquare, X, Send, Languages, Sparkles, Mic } from 'lucide-react';
 
 const ChatAssistant = () => {
-  const { selectedDestination, apiKey, regenerateDay, isChatOpen, toggleChat } = useContext(TravelContext);
+  const { 
+    selectedDestination, 
+    apiKey, 
+    regenerateDay, 
+    isChatOpen, 
+    toggleChat,
+    isOfflineSimulated 
+  } = useContext(TravelContext);
+  
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [targetLanguage, setTargetLanguage] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
+  // V2 Voice states
+  const [isListening, setIsListening] = useState(false);
+  const [speechLang, setSpeechLang] = useState('en-IN');
+
   const destination = DESTINATIONS.find(d => d.id === selectedDestination) || DESTINATIONS[0];
   const translationData = TRANSLATIONS[destination.state] || null;
+
+  const isOffline = isOfflineSimulated || !navigator.onLine;
 
   // Scroll messages to bottom
   const scrollToBottom = () => {
@@ -47,8 +61,48 @@ const ChatAssistant = () => {
     }
   }, [selectedDestination]);
 
+  // Speech recognition setup
+  const startSpeechRecognition = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Web Speech API is not supported by your current browser. Please try Google Chrome or Apple Safari.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = speechLang;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onresult = (event) => {
+      const speechToText = event.results[0][0].transcript;
+      setInputValue(speechToText);
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
   const handleSendMessage = async (textToSend) => {
     if (!textToSend.trim()) return;
+
+    if (isOffline) {
+      alert("Chat messages cannot be routed while offline.");
+      return;
+    }
 
     const userMsg = {
       sender: 'user',
@@ -112,9 +166,9 @@ const ChatAssistant = () => {
             reply = `The local language in ${destination.state} is primarily Hindi. You can say "Thank you" ➔ "Dhanyawaad" and "Hello" ➔ "Namaste".`;
           }
         } else if (lowercaseText.includes('cheap') || lowercaseText.includes('budget') || lowercaseText.includes('cost')) {
-          reply = `To make Day 2 cheaper in ${destination.name}, you can swap your scheduled restaurant for local street food centers like Vinayak thalis (Goa) or Saravana Bhavan (Munnar), which reduces dining costs to around ₹200/day.`;
+          reply = `To make your schedule cheaper in ${destination.name}, swap fine dining for local thali spots (average ₹150 per meal). Rent a scooter (₹350/day) instead of booking cabs.`;
         } else if (lowercaseText.includes('vegetarian') || lowercaseText.includes('veg')) {
-          reply = `Understood! I recommend dining at vegetarian spots like Saravana Bhavan, Artjuna Vegan, or Mango Tree. I can also tweak Day 2 activities to fit organic farm paths.`;
+          reply = `Understood! Swapping restaurants to vegetarian hubs. I'll search local organic markets and temple kitchens near ${destination.name} for you.`;
         } else if (lowercaseText.includes('tweak') || lowercaseText.includes('regenerate') || lowercaseText.includes('change')) {
           regenerateDay(1);
           reply = `Successfully tweaked Day 1 activities for ${destination.name}! Check your refreshed schedule on the Itinerary ledger.`;
@@ -156,7 +210,7 @@ const ChatAssistant = () => {
 
       {/* Chat Window Panel */}
       {isChatOpen && (
-        <div className="chat-window">
+        <div className="chat-window" style={{ height: '510px' }}>
           {/* Header */}
           <div style={{
             backgroundColor: 'var(--text-primary)',
@@ -180,7 +234,7 @@ const ChatAssistant = () => {
             <div style={{
               backgroundColor: 'var(--light-gray)',
               borderBottom: '1px solid var(--border-gray)',
-              padding: '8px 16px',
+              padding: '6px 16px',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -194,6 +248,41 @@ const ChatAssistant = () => {
               </span>
             </div>
           )}
+
+          {/* V2 Voice Input Language Selector */}
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            borderBottom: '1px solid var(--border-gray)',
+            padding: '6px 16px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontSize: '0.7rem'
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '700' }}>
+              🎤 Voice Input Dialect:
+            </span>
+            <select 
+              value={speechLang} 
+              onChange={e => setSpeechLang(e.target.value)}
+              style={{
+                border: '1px solid var(--border-gray)',
+                borderRadius: '6px',
+                padding: '2px 4px',
+                fontSize: '0.7rem',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+              disabled={isOffline}
+            >
+              <option value="en-IN">English (India)</option>
+              <option value="hi-IN">हिन्दी (Hindi)</option>
+              <option value="ta-IN">தமிழ் (Tamil)</option>
+              <option value="te-IN">తెలుగు (Telugu)</option>
+              <option value="kn-IN">ಕನ್ನಡ (Kannada)</option>
+              <option value="ml-IN">മലയാളം (Malayalam)</option>
+            </select>
+          </div>
 
           {/* Messages Feed */}
           <div style={{
@@ -250,13 +339,13 @@ const ChatAssistant = () => {
             overflowX: 'auto',
             whiteSpace: 'nowrap'
           }} className="non-printable">
-            <button onClick={() => handleSendMessage("Show native translations")} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--border-gray)', backgroundColor: 'var(--light-gray)', cursor: 'pointer' }}>
+            <button disabled={isOffline} onClick={() => handleSendMessage("Show native translations")} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--border-gray)', backgroundColor: 'var(--light-gray)', cursor: isOffline ? 'not-allowed' : 'pointer', opacity: isOffline ? 0.5 : 1 }}>
               🗣️ Translate Phrases
             </button>
-            <button onClick={() => handleSendMessage("Make Day 2 cheaper")} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--border-gray)', backgroundColor: 'var(--light-gray)', cursor: 'pointer' }}>
+            <button disabled={isOffline} onClick={() => handleSendMessage("Make Day 2 cheaper")} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--border-gray)', backgroundColor: 'var(--light-gray)', cursor: isOffline ? 'not-allowed' : 'pointer', opacity: isOffline ? 0.5 : 1 }}>
               📉 Make Cheaper
             </button>
-            <button onClick={() => handleSendMessage("Make it vegetarian")} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--border-gray)', backgroundColor: 'var(--light-gray)', cursor: 'pointer' }}>
+            <button disabled={isOffline} onClick={() => handleSendMessage("Make it vegetarian")} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--border-gray)', backgroundColor: 'var(--light-gray)', cursor: isOffline ? 'not-allowed' : 'pointer', opacity: isOffline ? 0.5 : 1 }}>
               🥗 Vegetarian Spots
             </button>
           </div>
@@ -271,20 +360,48 @@ const ChatAssistant = () => {
           }}>
             <input 
               type="text" 
-              placeholder="Ask travel question..." 
+              placeholder={isOffline ? "Assistant is offline..." : "Ask travel question..."} 
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
+              disabled={isOffline}
               style={{
                 flexGrow: '1',
                 border: '1px solid var(--border-gray)',
                 borderRadius: '12px',
                 padding: '10px 14px',
                 fontSize: '0.8rem',
-                outline: 'none'
+                outline: 'none',
+                backgroundColor: isOffline ? 'var(--light-gray)' : '#FFFFFF',
+                cursor: isOffline ? 'not-allowed' : 'text'
               }}
             />
+
+            {/* Microphone Voice button */}
+            <button
+              onClick={startSpeechRecognition}
+              disabled={isOffline}
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '12px',
+                backgroundColor: isListening ? '#FF3B30' : 'var(--light-gray)',
+                color: isListening ? '#FFFFFF' : 'var(--text-primary)',
+                border: '1px solid var(--border-gray)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: isOffline ? 'not-allowed' : 'pointer',
+                opacity: isOffline ? 0.5 : 1,
+                animation: isListening ? 'pulse 1s infinite' : 'none'
+              }}
+              title="Voice Input (Speech-to-Text)"
+            >
+              <Mic size={16} />
+            </button>
+
             <button 
+              disabled={isOffline}
               onClick={() => handleSendMessage(inputValue)}
               style={{
                 width: '38px',
@@ -296,7 +413,8 @@ const ChatAssistant = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                cursor: 'pointer'
+                cursor: isOffline ? 'not-allowed' : 'pointer',
+                opacity: isOffline ? 0.5 : 1
               }}
             >
               <Send size={16} />

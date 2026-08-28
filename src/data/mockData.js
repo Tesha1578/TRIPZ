@@ -16,7 +16,8 @@ export const DESTINATIONS = [
     },
     image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80",
     lat: 15.2993,
-    lng: 74.1240
+    lng: 74.1240,
+    eco_score: 68
   },
   {
     id: "munnar",
@@ -33,7 +34,8 @@ export const DESTINATIONS = [
     },
     image_url: "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?auto=format&fit=crop&w=600&q=80",
     lat: 10.0889,
-    lng: 77.0595
+    lng: 77.0595,
+    eco_score: 92
   },
   {
     id: "udaipur",
@@ -50,7 +52,8 @@ export const DESTINATIONS = [
     },
     image_url: "https://images.unsplash.com/photo-1585135497273-1a86b09fe70e?auto=format&fit=crop&w=600&q=80",
     lat: 24.5854,
-    lng: 73.7125
+    lng: 73.7125,
+    eco_score: 75
   },
   {
     id: "manali",
@@ -67,7 +70,8 @@ export const DESTINATIONS = [
     },
     image_url: "https://images.unsplash.com/photo-1597074866923-dc0589150358?auto=format&fit=crop&w=600&q=80",
     lat: 32.2396,
-    lng: 77.1887
+    lng: 77.1887,
+    eco_score: 82
   },
   {
     id: "ladakh",
@@ -84,7 +88,8 @@ export const DESTINATIONS = [
     },
     image_url: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=600&q=80",
     lat: 34.1526,
-    lng: 77.5771
+    lng: 77.5771,
+    eco_score: 96
   },
   {
     id: "hampi",
@@ -101,7 +106,8 @@ export const DESTINATIONS = [
     },
     image_url: "https://images.unsplash.com/photo-1600100397608-f0107770ed22?auto=format&fit=crop&w=600&q=80",
     lat: 15.3350,
-    lng: 76.4600
+    lng: 76.4600,
+    eco_score: 88
   },
   {
     id: "rishikesh",
@@ -118,7 +124,8 @@ export const DESTINATIONS = [
     },
     image_url: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=600&q=80",
     lat: 30.0869,
-    lng: 78.2676
+    lng: 78.2676,
+    eco_score: 90
   },
   {
     id: "pondicherry",
@@ -135,7 +142,8 @@ export const DESTINATIONS = [
     },
     image_url: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=600&q=80",
     lat: 11.9416,
-    lng: 79.8083
+    lng: 79.8083,
+    eco_score: 78
   }
 ];
 
@@ -528,3 +536,41 @@ export function generateFallbackItinerary(destinationId, days, interests) {
 
   return { days: list };
 }
+
+export const MOCK_LOCAL_LISTINGS = {
+  goa: [
+    { id: "l-g1", type: "guide", owner_name: "Rohan D'Souza", description: "Certified local heritage guide specializing in Old Goa church history & secret spice farms.", price: 1500, contact: "+91 98111 22233", rating: 4.9, verified: true },
+    { id: "l-g2", type: "homestay", owner_name: "Maria's Portuguese Villa", description: "Cozy heritage room in a restored 19th-century villa, located 5 mins from Fontainhas.", price: 2200, contact: "+91 98111 22244", rating: 4.8, verified: true },
+    { id: "l-g3", type: "experience", owner_name: "Backwater Kayaking Tour", description: "Eco-friendly morning kayak exploration through Sal backwaters and mangrove ecosystems.", price: 1200, contact: "+91 98111 22255", rating: 4.7, verified: true }
+  ],
+  munnar: [
+    { id: "l-m1", type: "guide", owner_name: "Suresh Kumar", description: "Local estate expert for sunrise trekking to Kolukkumalai tea heights.", price: 1200, contact: "+91 98111 33344", rating: 4.9, verified: true },
+    { id: "l-m2", type: "homestay", owner_name: "Mist Valley Organic Farmstay", description: "Eco-homestay surrounded by cardamom plantations; traditional Kerala home-cooked food.", price: 1800, contact: "+91 98111 33355", rating: 4.6, verified: true },
+    { id: "l-m3", type: "experience", owner_name: "Kathakali & Kalaripayattu Show", description: "Traditional performing arts reservation with front-row seats at Punarjani Traditional Village.", price: 500, contact: "+91 98111 33366", rating: 4.8, verified: false }
+  ],
+  udaipur: [
+    { id: "l-u1", type: "guide", owner_name: "Vikram Singh", description: "Heritage walk guide through City Palace, bagore ki haveli, and old bazaars.", price: 1000, contact: "+91 98111 44455", rating: 4.8, verified: true },
+    { id: "l-u2", type: "homestay", owner_name: "Lakeview Haveli Homestay", description: "Traditional Rajasthani haveli room overlooking Lake Pichola with rooftop dining.", price: 2500, contact: "+91 98111 44466", rating: 4.7, verified: true }
+  ],
+  manali: [
+    { id: "l-mn1", type: "guide", owner_name: "Tenzing Sherpa", description: "Paragliding pilot and certified mountain trekking lead for Solang and Beas Kund trail.", price: 2500, contact: "+91 98111 55566", rating: 4.9, verified: true },
+    { id: "l-mn2", type: "homestay", owner_name: "Old Manali Wooden Cabin", description: "Rustic cedar wood cabin near Manu Temple; features bonfire nights and apple orchard surroundings.", price: 1600, contact: "+91 98111 55577", rating: 4.7, verified: true }
+  ],
+  ladakh: [
+    { id: "l-l1", type: "guide", owner_name: "Stanzin Gyatso", description: "Leh-based local driver and permit facilitator for Pangong, Nubra Valley, and Khardung La.", price: 3500, contact: "+91 98111 66677", rating: 5.0, verified: true },
+    { id: "l-l2", type: "homestay", owner_name: "Nubra Valley Eco-Homestay", description: "Warm Ladakhi family homestay in Diskit village with organic greenhouse dining.", price: 1500, contact: "+91 98111 66688", rating: 4.9, verified: true }
+  ],
+  hampi: [
+    { id: "l-h1", type: "guide", owner_name: "Manjunath Raju", description: "Archaeological expert on Vijayanagara ruins, stone chariot, and Virupaksha Temple details.", price: 1200, contact: "+91 98111 77788", rating: 4.8, verified: true },
+    { id: "l-h2", type: "homestay", owner_name: "Hampi Banana Farm Stay", description: "Peaceful stay amidst banana plantations with local food and coracle ferry access.", price: 1200, contact: "+91 98111 77799", rating: 4.6, verified: true }
+  ],
+  rishikesh: [
+    { id: "l-r1", type: "guide", owner_name: "Swami Anand", description: "Yoga and meditation instructor offering private spiritual retreats and ganga beach walks.", price: 800, contact: "+91 98111 88899", rating: 4.9, verified: false },
+    { id: "l-r2", type: "experience", owner_name: "Red Chilli Adventure Rafting", description: "Government-licensed white-water rafting from Shivpuri (16km) with complete safety gear.", price: 1000, contact: "+91 98111 88800", rating: 4.8, verified: true }
+  ],
+  pondicherry: [
+    { id: "l-p1", type: "guide", owner_name: "Jean-Pierre", description: "Bilingual French-Tamil guide leading cycle tours through French Quarters and Heritage Town.", price: 1500, contact: "+91 98111 99900", rating: 4.7, verified: true },
+    { id: "l-p2", type: "homestay", owner_name: "Auroville Eco Guest House", description: "Solar-powered serene cottage built with sustainable terracotta blocks.", price: 1800, contact: "+91 98111 99911", rating: 4.5, verified: true }
+  ]
+};
+
